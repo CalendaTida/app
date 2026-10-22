@@ -1,0 +1,28 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: #eef3f4; --card: #ffffff; --ink: #10282f; --mut: #5b7078; --line: #d3dee1;
+  --plan: #4054d6; --ok: #0f7f78; --okfg: #ffffff; --warn: #b4462f; --dot: #c4d3d8;
+  color-scheme: light;
+}
+.dark {
+  --bg: #081216; --card: #0f1f26; --ink: #e6f1f3; --mut: #8aa5ad; --line: #1f3640;
+  --plan: #8da0ff; --ok: #1fb3a8; --okfg: #04201e; --warn: #ff8a70; --dot: #2a434d;
+  color-scheme: dark;
+}
+
+body { @apply bg-bg font-body text-ink antialiased; }
+:focus-visible { outline: 3px solid var(--plan); outline-offset: 2px; }
+h1, h2, h3 { @apply font-display font-bold tracking-tight; }
+
+@layer components {
+  .card { @apply mt-4 rounded-2xl border border-line bg-card p-5; }
+  .btn { @apply inline-block cursor-pointer rounded-xl bg-ink px-4 py-2.5 text-center font-semibold text-bg; }
+  .btn-alt { @apply inline-block cursor-pointer rounded-xl border border-line bg-transparent px-4 py-2.5 text-center font-semibold text-ink; }
+  .btn-danger { @apply inline-block cursor-pointer rounded-xl border border-line bg-transparent px-4 py-2.5 font-semibold text-warn; }
+  .lbl { @apply mt-3.5 block font-semibold; }
+  .inp { @apply mt-1.5 w-full rounded-xl border border-line bg-card px-3 py-2.5 text-ink; }
+  .hint { @apply mt-1.5 text-sm text-mut; }
+}
