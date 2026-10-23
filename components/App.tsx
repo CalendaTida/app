@@ -4,6 +4,7 @@ import Calendar from './Calendar';
 import ConfigForm from './ConfigForm';
 import DayDialog from './DayDialog';
 import ThemeToggle from './ThemeToggle';
+import { supabaseBrowser } from '@/lib/supabase-browser';
 import { Cfg, Data, DOW, age, bmi, bmiLabel, endDate, fmt, iso, kg, nextPlan, parse, penInfo } from '@/lib/core';
 
 export default function App({ name }: { name: string }) {
@@ -32,7 +33,7 @@ export default function App({ name }: { name: string }) {
       } catch { setStatus('Sem conexão. Tente novamente.'); }
     }, 700);
   };
-  const logout = async () => { await fetch('/api/logout', { method: 'POST' }); location.reload(); };
+  const logout = async () => { await supabaseBrowser().auth.signOut(); location.reload(); };
 
   if (!data) return <main className="mx-auto max-w-5xl p-6 text-mut">{status || 'Carregando…'}</main>;
   if (!data.cfg || editing) {
