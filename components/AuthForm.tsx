@@ -4,11 +4,13 @@ import { supabaseBrowser } from '@/lib/supabase-browser';
 
 const tr = (m: string) =>
   m.includes('Invalid login') ? 'E-mail ou senha incorretos.'
-    : m.includes('not confirmed') ? 'Confirme seu e-mail antes de entrar.'
+    : m.includes('not confirmed') ? 'Esta conta ainda não foi confirmada. Veja o README (Supabase) para liberar contas antigas.'
     : m.includes('already registered') ? 'Este e-mail já tem uma conta.'
     : m.includes('at least') ? 'A senha precisa ter pelo menos 6 caracteres.'
+    : m.includes('is invalid') ? 'Este e-mail não foi aceito. Confira se está correto.'
+    : m.toLowerCase().includes('signups not allowed') ? 'Cadastros desativados no Supabase.'
     : m.toLowerCase().includes('rate limit') ? 'Muitas tentativas. Aguarde um pouco e tente de novo.'
-    : 'Não foi possível concluir. Tente novamente.';
+    : `Não foi possível concluir (${m}).`;
 
 export default function AuthForm({ initial }: { initial: 'in' | 'up' }) {
   const [mode, setMode] = useState(initial);

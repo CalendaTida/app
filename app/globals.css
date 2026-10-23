@@ -31,7 +31,7 @@ h1, h2, h3 { @apply font-display font-bold tracking-tight; }
 }
 
 /* animações */
-@keyframes drift { 0%, 100% { transform: translate(0, 0) scale(1); } 50% { transform: translate(40px, -24px) scale(1.12); } }
+@keyframes drift { 0%, 100% { transform: translate(0, 0) scale(1); } 33% { transform: translate(90px, -60px) scale(1.18); } 66% { transform: translate(-70px, 50px) scale(.92); } }
 @keyframes bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
 @keyframes slide { to { transform: translateX(-50%); } }
 @keyframes slide-rev { from { transform: translateX(-50%); } to { transform: translateX(0); } }
