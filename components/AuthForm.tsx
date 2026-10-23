@@ -2,13 +2,6 @@
 import { useState } from 'react';
 import { supabaseBrowser } from '@/lib/supabase-browser';
 
-// Google e Microsoft ficam desativados. Para ligar um deles: troque `on` para true e ative o provedor no painel do Supabase.
-const SOCIAL = [
-  { id: 'github', label: 'GitHub', on: true },
-  { id: 'google', label: 'Google', on: false },
-  { id: 'azure', label: 'Microsoft', on: false },
-] as const;
-
 const tr = (m: string) =>
   m.includes('Invalid login') ? 'E-mail ou senha incorretos.'
     : m.includes('not confirmed') ? 'Confirme seu e-mail antes de entrar.'
@@ -17,8 +10,8 @@ const tr = (m: string) =>
     : m.toLowerCase().includes('rate limit') ? 'Muitas tentativas. Aguarde um pouco e tente de novo.'
     : 'Não foi possível concluir. Tente novamente.';
 
-export default function AuthForm() {
-  const [mode, setMode] = useState<'in' | 'up'>('in');
+export default function AuthForm({ initial }: { initial: 'in' | 'up' }) {
+  const [mode, setMode] = useState(initial);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -31,50 +24,37 @@ export default function AuthForm() {
     const sb = supabaseBrowser();
     if (mode === 'in') {
       const { error } = await sb.auth.signInWithPassword({ email, password });
-      if (error) setMsg({ ok: false, t: tr(error.message) }); else return location.reload();
+      if (error) setMsg({ ok: false, t: tr(error.message) }); else return location.assign('/');
     } else {
-      const { data, error } = await sb.auth.signUp({
-        email, password,
-        options: { data: { full_name: name.trim() || undefined }, emailRedirectTo: `${location.origin}/auth/callback` },
-      });
+      const { data, error } = await sb.auth.signUp({ email, password, options: { data: { full_name: name.trim() || undefined } } });
       if (error) setMsg({ ok: false, t: tr(error.message) });
       else if (data.user?.identities?.length === 0) setMsg({ ok: false, t: 'Este e-mail já tem uma conta.' });
-      else if (data.session) return location.reload();
-      else setMsg({ ok: true, t: `Enviamos um link de confirmação para ${email}. Confirme e depois entre.` });
+      else if (data.session) return location.assign('/'); // conta criada: já entra direto
+      else setMsg({ ok: true, t: `Conta criada. Confirme pelo link enviado para ${email} e depois entre.` });
     }
     setBusy(false);
   };
 
-  const social = async (provider: (typeof SOCIAL)[number]['id']) => {
-    setMsg(null);
-    const { error } = await supabaseBrowser().auth.signInWithOAuth({ provider, options: { redirectTo: `${location.origin}/auth/callback` } });
-    if (error) setMsg({ ok: false, t: 'Não foi possível iniciar o login. Tente novamente.' });
-  };
+  const tab = (m: 'in' | 'up', label: string) => (
+    <button type="button" role="tab" aria-selected={mode === m} className={mode === m ? 'btn' : 'btn-alt'} onClick={() => { setMode(m); setMsg(null); }}>{label}</button>
+  );
 
   return (
-    <div className="mt-6">
-      <div className="grid grid-cols-2 gap-2" role="tablist">
-        <button type="button" role="tab" aria-selected={mode === 'in'} className={mode === 'in' ? 'btn' : 'btn-alt'} onClick={() => { setMode('in'); setMsg(null); }}>Entrar</button>
-        <button type="button" role="tab" aria-selected={mode === 'up'} className={mode === 'up' ? 'btn' : 'btn-alt'} onClick={() => { setMode('up'); setMsg(null); }}>Criar conta</button>
-      </div>
-      <form onSubmit={submit}>
-        {mode === 'up' && (
-          <><label className="lbl" htmlFor="nm">Nome</label>
-            <input id="nm" className="inp" autoComplete="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Como quer ser chamado" /></>
-        )}
+    <div>
+      <div className="grid grid-cols-2 gap-2" role="tablist">{tab('up', 'Criar conta')}{tab('in', 'Entrar')}</div>
+      <form onSubmit={submit} key={mode} className="rise">
+        {mode === 'up' && (<>
+          <label className="lbl" htmlFor="nm">Nome</label>
+          <input id="nm" className="inp" autoComplete="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Como quer ser chamado" />
+        </>)}
         <label className="lbl" htmlFor="em">E-mail</label>
         <input id="em" type="email" required className="inp" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} />
         <label className="lbl" htmlFor="pw">Senha</label>
         <input id="pw" type="password" required minLength={6} className="inp" autoComplete={mode === 'in' ? 'current-password' : 'new-password'} value={password} onChange={(e) => setPassword(e.target.value)} />
-        <button type="submit" className="btn mt-4 w-full py-3" disabled={busy}>{busy ? 'Aguarde…' : mode === 'in' ? 'Entrar' : 'Criar conta'}</button>
+        {mode === 'up' && <p className="hint">Mínimo de 6 caracteres. Você entra na hora, sem precisar confirmar nada.</p>}
+        <button type="submit" className="btn mt-5 w-full py-3" disabled={busy}>{busy ? 'Aguarde…' : mode === 'in' ? 'Entrar' : 'Criar conta e entrar'}</button>
       </form>
-      {msg && <p role="alert" className={`hint ${msg.ok ? '!text-ok' : '!text-warn'}`}>{msg.t}</p>}
-      <div className="my-5 flex items-center gap-3 text-sm text-mut"><span className="h-px flex-1 bg-line" />ou<span className="h-px flex-1 bg-line" /></div>
-      <div className="grid gap-2.5">
-        {SOCIAL.filter((s) => s.on).map((s) => (
-          <button key={s.id} type="button" className="btn-alt py-3" onClick={() => social(s.id)}>Entrar com {s.label}</button>
-        ))}
-      </div>
+      {msg && <p role="alert" className={`hint pop ${msg.ok ? '!text-ok' : '!text-warn'}`}>{msg.t}</p>}
     </div>
   );
 }

@@ -20,7 +20,7 @@ export default function DayDialog({ ds, cfg, log, onSave, onClose }: Props) {
   };
 
   return (
-    <dialog ref={ref} onClose={onClose} className="m-auto w-[min(440px,92vw)] rounded-2xl border border-line bg-card p-5 text-ink backdrop:bg-black/60">
+    <dialog ref={ref} onClose={onClose} className="pop m-auto w-[min(440px,92vw)] rounded-2xl border border-line bg-card p-5 text-ink backdrop:bg-black/60">
       <h3 className="text-xl">{DOW[parse(ds).getDay()]}, {fmt(ds)}</h3>
       <p className="hint">{plan ? 'Dia de registro do seu tratamento.' : 'Fora do seu dia habitual. Use para registrar em outra data.'}</p>
       <label className="mt-3.5 flex items-center gap-2.5 font-semibold">

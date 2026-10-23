@@ -5,7 +5,7 @@ import ConfigForm from './ConfigForm';
 import DayDialog from './DayDialog';
 import ThemeToggle from './ThemeToggle';
 import { supabaseBrowser } from '@/lib/supabase-browser';
-import { Cfg, Data, DOW, age, bmi, bmiLabel, endDate, fmt, iso, kg, nextPlan, parse, penInfo } from '@/lib/core';
+import { Cfg, Data, DOW, age, bmi, bmiLabel, endDate, fmt, freqLabel, iso, kg, nextPlan, parse, penFreq, penInfo } from '@/lib/core';
 
 export default function App({ name }: { name: string }) {
   const [data, setData] = useState<Data | null>(null);
@@ -52,7 +52,7 @@ export default function App({ name }: { name: string }) {
   const diff = last && first && weights.length > 1 ? last - first : null;
   const next = nextPlan(cfg, today);
   const stats = [
-    { v: cfg.pen, l: `${pen.g}, aplicação ${pen.f}` },
+    { v: cfg.pen, l: `${pen.g}, ${freqLabel(penFreq(cfg.pen))}` },
     { v: last ? `${kg(last)} kg` : '—', l: 'Peso atual' },
     { v: cur ? kg(cur) : '—', l: cur ? `IMC, ${bmiLabel(cur, cfg.birth)}` : 'IMC' },
     { v: diff === null ? '—' : `${diff > 0 ? '+' : ''}${kg(diff)} kg`, l: 'Variação desde o início' },
@@ -62,7 +62,7 @@ export default function App({ name }: { name: string }) {
 
   return (
     <main className="mx-auto max-w-5xl px-4 pb-16 pt-5">
-      <header className="flex flex-wrap items-center justify-between gap-3">
+      <header className="rise flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/logo.svg" alt="" className="size-11" />
@@ -76,13 +76,13 @@ export default function App({ name }: { name: string }) {
         </div>
       </header>
 
-      <section className="card grid grid-cols-[repeat(auto-fit,minmax(150px,1fr))] gap-3">
+      <section className="card rise [animation-delay:80ms] grid grid-cols-[repeat(auto-fit,minmax(150px,1fr))] gap-3">
         {stats.map((s) => (
           <div key={s.l}><b className="block font-display text-2xl">{s.v}</b><span className="text-sm text-mut">{s.l}</span></div>
         ))}
       </section>
 
-      <section className="card flex flex-wrap items-center justify-between gap-4 border-l-[6px] border-l-plan">
+      <section className="card rise [animation-delay:160ms] flex flex-wrap items-center justify-between gap-4 border-l-[6px] border-l-plan">
         <div>
           <h3 className="text-lg">{next ? 'Próximo registro' : 'Tratamento concluído'}</h3>
           <span className="text-sm text-mut">{next ? `${DOW[parse(next).getDay()]}, ${fmt(next)}` : 'O período configurado terminou. Ajuste a duração na configuração, se continuar.'}</span>
@@ -90,7 +90,7 @@ export default function App({ name }: { name: string }) {
         {next && <button type="button" className="btn" onClick={() => setPick(next)}>Registrar</button>}
       </section>
 
-      <section className="card">
+      <section className="card rise [animation-delay:240ms]">
         <h3 className="text-lg">Anotações para a próxima consulta</h3>
         <textarea className="inp min-h-24" placeholder="Efeitos, dúvidas, doses, o que perguntar ao médico" value={cfg.notes}
           onChange={(e) => commit({ ...data, cfg: { ...cfg, notes: e.target.value } })} />
@@ -101,7 +101,7 @@ export default function App({ name }: { name: string }) {
         <h2 className="text-3xl">{year}</h2>
         <button type="button" className="btn-alt" onClick={() => setYear(year + 1)} aria-label="Próximo ano">›</button>
       </div>
-      <p className="mt-2 text-sm text-mut">Anel: dia de registro. Preenchido: aplicação feita. Sublinhado: peso registrado. Clique em qualquer dia para registrar.</p>
+      <p className="mt-2 text-sm text-mut">Anel: dia de registro. Preenchido: aplicação feita. Sublinhado: peso registrado. Passe o mouse (ou toque) num mês para ampliar e clique no dia para registrar.</p>
       <Calendar cfg={cfg} logs={logs} year={year} today={today} onPick={setPick} />
 
       <section className="card">
